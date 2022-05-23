@@ -82,6 +82,45 @@ def computeMean3x3(pixel_array, image_width, image_height):
     return mean_array
 
 
+def computeMedian5x3ZeroPadding(pixel_array, image_width, image_height):
+    median_array = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for r in range(image_height):
+        for c in range(image_width):
+            values = []
+            for i in [-1, 0, 1]:
+                for j in [-2, -1, 0, 1, 2]:
+                    if (r+i < 0 or r+i >= image_height or c+j < 0 or c+j >= image_width):
+                        values.append(0)
+                    else:
+                        values.append(pixel_array[r+i][c+j])
+
+            values.sort()
+            index = (len(values)-1) // 2
+            median_array[r][c] = values[index]
+
+    return median_array
+
+
+def computeVerticalEdgesSobelAbsolute(pixel_array, image_width, image_height):
+    sobel = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for r in range(1, image_height-1):
+        for c in range (1, image_width-1):
+            output_pixel = pixel_array[r-1][c-1] * -1 - pixel_array[r-1][c] * -2 - pixel_array[r-1][c+1] * -1 + pixel_array[r+1][c-1] * 1 + pixel_array[r+1][c] * 2 + pixel_array[r+1][c+1] * 1
+
+
+def computeHorizontalEdgesSobelAbsolute(pixel_array, image_width, image_height):
+    sobel = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for r in range(1, image_height-1):
+        for c in range(1, image_width-1):
+            output = (pixel_array[r-1][c-1] + 2*pixel_array[r-1][c] + pixel_array[r-1][c+1]
+                      - pixel_array[r+1][c-1] - 2*pixel_array[r+1][c] - pixel_array[r+1][c+1])/8
+            sobel[r][c] = abs(output)
+
+    return sobel
+
 def main():
     filename = "krakow.png"
 
@@ -90,6 +129,7 @@ def main():
 
     pixel_array = px_array_r
 
+    mean_5x3 = computeMedian5x3ZeroPadding(pixel_array, image_width, image_height)
     filtered_image = computeMean3x3(pixel_array, image_width, image_height)
 
     fig1, axs1 = pyplot.subplots(2, 1)
