@@ -231,15 +231,21 @@ def computeDilation8Nbh3x3FlatSE(pixel_array, image_width, image_height):
 
     for r in range(image_height):
         for c in range(image_width):
-            for i in [-1, 0, 1]:
-                for j in [-1, 0, 1]:
-                    if (r+i >= 0 and r+i < image_height and 
-                        c+j >= 0 and c+j < image_width and 
-                        pixel_array[r+i][c+j] != 0):
-                        dilation[r][c] = 1
-                        break
+            if containsNonZero3x3(pixel_array, image_width, image_height, r, c):
+                dilation[r][c] = 1
 
     return dilation
+
+
+def containsNonZero3x3(pixel_array, image_width, image_height, r, c):
+    for i in [-1, 0, 1]:
+        for j in [-1, 0, 1]:
+            if (r+i >= 0 and r+i < image_height and
+                c+j >= 0 and c+j < image_width and
+                pixel_array[r+i][c+j] != 0):
+                return True
+
+    return False
 
 
 def computeErosion8Nbh3x3FlatSE(pixel_array, image_width, image_height):
@@ -249,18 +255,22 @@ def computeErosion8Nbh3x3FlatSE(pixel_array, image_width, image_height):
         for c in range(image_width):
             if r == 0 or r == image_height-1 or c == 0 or c == image_width-1:
                 continue
-
-            pixel_value = 1
-            for i in [-1, 0, 1]:
-                for j in [-1, 0, 1]:
-                    if pixel_array[r+i][c+j] == 0:
-                        pixel_value = 0
-                        break
-
-            erosion[r][c] = pixel_value
+            
+            if not containsZero3x3(pixel_array, image_width, image_height, r, c):
+                erosion[r][c] = 1
 
     return erosion
 
+
+def containsZero3x3(pixel_array, image_width, image_height, r, c):
+    for i in [-1, 0, 1]:
+        for j in [-1, 0, 1]:
+            if (r+i >= 0 and r+i < image_height and
+                c+j >= 0 and c+j < image_width and
+                pixel_array[r+i][c+j] == 0):
+                return True
+
+    return False
 
 if __name__ == "__main__":
     main()
