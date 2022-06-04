@@ -100,12 +100,12 @@ def main():
 
     # Compute greyscale image from RGB image.
     print("Computing greyscale image...")
-    px_array = computeRGBToGreyscale(px_array_r, px_array_g, px_array_b, image_width, image_height)
+    px_array_grey = computeRGBToGreyscale(px_array_r, px_array_g, px_array_b, image_width, image_height)
 
     # Compute std_dev image then stretch min-max scaling 0 to 255.
     # TODO: Potentially swap around.
     print("Computing standard deviation image...")
-    px_array = computeStandardDeviationImage5x5(px_array, image_width, image_height)
+    px_array = computeStandardDeviationImage5x5(px_array_grey, image_width, image_height)
     print("Computing 0 to 255 stretched image...")
     px_array = scaleTo0And255AndQuantize(px_array, image_width, image_height)
     
@@ -140,7 +140,7 @@ def main():
 
     # Draw a bounding box as a rectangle into the input image
     axs1[1, 1].set_title('Final image of detection')
-    axs1[1, 1].imshow(px_array, cmap='gray')
+    axs1[1, 1].imshow(px_array_grey, cmap='gray')
     rect = Rectangle((bbox_min_x, bbox_min_y), bbox_max_x - bbox_min_x, bbox_max_y - bbox_min_y, linewidth=1,
                      edgecolor='g', facecolor='none')
     axs1[1, 1].add_patch(rect)
