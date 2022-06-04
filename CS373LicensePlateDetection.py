@@ -122,19 +122,21 @@ def main():
         print("Computing erosion step #{}...".format(i+1))
         px_array = computeErosion8Nbh3x3FlatSE(px_array, image_width, image_height)
 
+    # Compute connected components image.
+    print("Computing connected components...")
+    (px_array, components) = computeConnectedComponentLabeling(px_array, image_width, image_height)
+
+    # Compute a bounding box. Largest connected component within correct aspect ratio.
+    print("Computing bounding box...")
+    bbox_min_x, bbox_max_x, bbox_min_y, bbox_max_y = 0, 0, 0, 0
+    components.sort(key=lambda x: x[1], reverse=True)
+    for (label, count, x_min, x_max, y_min, y_max) in components:
+        aspect_ratio = (x_max - x_min + 1) / (y_max - y_min + 1)
+        if (1.5 <= aspect_ratio <= 5):
+            bbox_min_x, bbox_max_x, bbox_min_y, bbox_max_y = x_min, x_max, y_min, y_max
+            break
+
     print("Processing complete!")
-
-    # compute a dummy bounding box centered in the middle of the input image, and with as size of half of width and height
-    center_x = image_width / 2.0
-    center_y = image_height / 2.0
-    bbox_min_x = center_x - image_width / 4.0
-    bbox_max_x = center_x + image_width / 4.0
-    bbox_min_y = center_y - image_height / 4.0
-    bbox_max_y = center_y + image_height / 4.0
-
-
-
-
 
     # Draw a bounding box as a rectangle into the input image
     axs1[1, 1].set_title('Final image of detection')
@@ -271,6 +273,66 @@ def containsZero3x3(pixel_array, image_width, image_height, r, c):
                 return True
 
     return False
+
+
+class Queue:
+    def __init__(self):
+        self.items = []
+
+    def isEmpty(self):
+        return self.items == []
+
+    def enqueue(self, item):
+        self.items.insert(0, item)
+
+    def dequeue(self):
+        return self.items.pop()
+
+    def size(self):
+        return len(self.items)
+
+
+def computeConnectedComponentLabeling(pixel_array, image_width, image_height):
+    result = createInitializedGreyscalePixelArray(image_width, image_height)
+    components = []
+
+    visited = set()
+    directions = [(0, -1), (0, 1), (1, 0), (-1, 0)]
+
+    label, count = 1, 0
+    x_min, x_max, y_min, y_max = image_width-1, 0, image_height-1, 0
+    for r in range(image_height):
+        for c in range(image_width):
+            if pixel_array[r][c] == 0 or (r, c) in visited:
+                continue
+
+            queue = Queue()
+            queue.enqueue((r, c))
+            visited.add((r, c))
+
+            while not queue.isEmpty():
+                (row, col) = queue.dequeue()
+                result[row][col] = label
+
+                count += 1
+                x_min = min(x_min, col)
+                x_max = max(x_max, col)
+                y_min = min(y_min, row)
+                y_max = max(y_max, row)
+
+                for (dr, dc) in directions:
+                    r1, c1 = row + dr, col + dc
+                    if (r1 in range(image_height) and c1 in range(image_width)
+                            and pixel_array[r1][c1] != 0 and (r1, c1) not in visited):
+                        queue.enqueue((r1, c1))
+                        visited.add((r1, c1))
+
+            components.append((label, count, x_min, x_max, y_min, y_max))
+            label, count = label+1, 0
+            x_min, x_max, y_min, y_max = image_width-1, 0, image_height-1, 0
+
+    return (result, components)
+
 
 if __name__ == "__main__":
     main()
