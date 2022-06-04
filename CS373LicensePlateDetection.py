@@ -98,7 +98,31 @@ def main():
 
     # STUDENT IMPLEMENTATION here
 
-    px_array = px_array_r
+    # Compute greyscale image from RGB image.
+    print("Computing greyscale image...")
+    px_array = computeRGBToGreyscale(px_array_r, px_array_g, px_array_b, image_width, image_height)
+
+    # Compute std_dev image then stretch min-max scaling 0 to 255.
+    # TODO: Potentially swap around.
+    print("Computing standard deviation image...")
+    px_array = computeStandardDeviationImage5x5(px_array, image_width, image_height)
+    print("Computing 0 to 255 stretched image...")
+    px_array = scaleTo0And255AndQuantize(px_array, image_width, image_height)
+    
+    # Compute threshold image with simple thresholding.
+    # TODO: Adaptive thresholding.
+    px_array = computeThresholdGE(px_array, 150, image_width, image_height)
+
+    # Compute dialation and erosion.
+    for i in range(7):
+        print("Computing dialation step #{}...".format(i+1))
+        px_array = computeDilation8Nbh3x3FlatSE(px_array, image_width, image_height)
+    
+    for i in range(7):
+        print("Computing erosion step #{}...".format(i+1))
+        px_array = computeErosion8Nbh3x3FlatSE(px_array, image_width, image_height)
+
+    print("Processing complete!")
 
     # compute a dummy bounding box centered in the middle of the input image, and with as size of half of width and height
     center_x = image_width / 2.0
@@ -128,6 +152,114 @@ def main():
     if SHOW_DEBUG_FIGURES:
         # plot the current figure
         pyplot.show()
+
+
+def computeRGBToGreyscale(pixel_array_r, pixel_array_g, pixel_array_b, image_width, image_height):
+
+    greyscale_pixel_array = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for row in range(image_height):
+        for col in range(image_width):
+            r = pixel_array_r[row][col]
+            g = pixel_array_g[row][col]
+            b = pixel_array_b[row][col]
+            greyscale_pixel_array[row][col] = round(
+                0.299 * r + 0.587 * g + 0.114 * b)
+
+    return greyscale_pixel_array
+
+
+def computeStandardDeviationImage5x5(pixel_array, image_width, image_height):
+    image = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for r in range(2, image_height-2):
+        for c in range(2, image_width-2):
+            nums = []
+            for i in [-2, -1, 0, 1, 2]:
+                for j in [-2, -1, 0, 1, 2]:
+                    nums.append(pixel_array[r+i][c+j])
+
+            image[r][c] = get_standard_deviation(nums)
+
+    return image
+
+
+def get_standard_deviation(nums):
+    length = len(nums)
+    mean = sum(nums) / length
+    variance = sum((x - mean)**2 for x in nums) / length
+    standard_deviation = variance ** 0.5
+    return standard_deviation
+
+
+def computeMinAndMaxValues(pixel_array, image_width, image_height):
+    minimum, maximum = 255, 0
+
+    for r in range(image_height):
+        for c in range(image_width):
+            minimum = min(minimum, pixel_array[r][c])
+            maximum = max(maximum, pixel_array[r][c])
+
+    return (minimum, maximum)
+
+
+def scaleTo0And255AndQuantize(pixel_array, image_width, image_height):
+    image = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    (fmin, fmax) = computeMinAndMaxValues(pixel_array, image_width, image_height)
+    a = 1 if fmax == fmin else 255 / (fmax - fmin)
+    b = a - fmin
+
+    for r in range(image_height):
+        for c in range(image_width):
+            image[r][c] = round(a * pixel_array[r][c] + b)
+
+    return image
+
+
+def computeThresholdGE(pixel_array, threshold_value, image_width, image_height):
+    image = createInitializedGreyscalePixelArray(image_width, image_height)
+    for r in range(image_height):
+        for c in range(image_width):
+            image[r][c] = 1 if pixel_array[r][c] >= threshold_value else 0
+
+    return image
+
+# TODO: Potentially optimize border handling.
+def computeDilation8Nbh3x3FlatSE(pixel_array, image_width, image_height):
+    dilation = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for r in range(image_height):
+        for c in range(image_width):
+            for i in [-1, 0, 1]:
+                for j in [-1, 0, 1]:
+                    if (r+i >= 0 and r+i < image_height and 
+                        c+j >= 0 and c+j < image_width and 
+                        pixel_array[r+i][c+j] != 0):
+                        dilation[r][c] = 1
+                        break
+
+    return dilation
+
+
+def computeErosion8Nbh3x3FlatSE(pixel_array, image_width, image_height):
+    erosion = createInitializedGreyscalePixelArray(image_width, image_height)
+
+    for r in range(image_height):
+        for c in range(image_width):
+            if r == 0 or r == image_height-1 or c == 0 or c == image_width-1:
+                continue
+
+            pixel_value = 1
+            for i in [-1, 0, 1]:
+                for j in [-1, 0, 1]:
+                    if pixel_array[r+i][c+j] == 0:
+                        pixel_value = 0
+                        break
+
+            erosion[r][c] = pixel_value
+
+    return erosion
 
 
 if __name__ == "__main__":
