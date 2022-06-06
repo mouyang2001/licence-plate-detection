@@ -103,14 +103,12 @@ def main():
     px_array_grey = computeRGBToGreyscale(px_array_r, px_array_g, px_array_b, image_width, image_height)
 
     # Compute std_dev image then stretch min-max scaling 0 to 255.
-    # TODO: Potentially swap around.
     print("Computing standard deviation image...")
     px_array = computeStandardDeviationImage5x5(px_array_grey, image_width, image_height)
     print("Computing 0 to 255 stretched image...")
     px_array = scaleTo0And255AndQuantize(px_array, image_width, image_height)
     
     # Compute threshold image with simple thresholding.
-    # TODO: Adaptive thresholding.
     px_array = computeThresholdGE(px_array, 150, image_width, image_height)
 
     # Compute dialation and erosion.
@@ -227,7 +225,7 @@ def computeThresholdGE(pixel_array, threshold_value, image_width, image_height):
 
     return image
 
-# TODO: Potentially optimize border handling.
+
 def computeDilation8Nbh3x3FlatSE(pixel_array, image_width, image_height):
     dilation = createInitializedGreyscalePixelArray(image_width, image_height)
 
