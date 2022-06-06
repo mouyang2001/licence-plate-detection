@@ -6,9 +6,3 @@ This assignment will require you to use what we have studied in the image proces
 
 You will receive 10 marks for solving the license plate detection problem, and there will be an additional component for 5 marks, where you will extend upon the license plate detection, and write a short reflective report about your extension.
 
-# Extension
-Possible improvements extension could solve:
-[] Find challenging images.
-[] Use OpenCV to optimize speed and efficiency.
-[] Filters to reduce salt and pepper noise to improve BFS and sorting.
-[] Text extraction library, e.g pytesseract OCR library.
