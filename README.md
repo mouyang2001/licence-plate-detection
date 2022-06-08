@@ -7,7 +7,7 @@ This assignment will require you to use what we have studied in the image proces
 You will receive 10 marks for solving the license plate detection problem, and there will be an additional component for 5 marks, where you will extend upon the license plate detection, and write a short reflective report about your extension.
 
 # Run
-Make sure you have the latest version of pip and python.
+Make sure you have the latest version of pip and python. I tested on python 3.10.2 and beyond.
 
 Install requirements:
 
