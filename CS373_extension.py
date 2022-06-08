@@ -71,7 +71,7 @@ def main():
     SHOW_DEBUG_FIGURES = True
 
     # this is the default input image filename
-    input_filename = "numberplate4.png"
+    input_filename = "numberplate5.png"
 
     if command_line_arguments != []:
         input_filename = command_line_arguments[0]
@@ -83,14 +83,13 @@ def main():
         output_path.mkdir(parents=True, exist_ok=True)
 
     output_filename = output_path / \
-        Path(input_filename.replace(".png", "_output.png"))
+        Path(input_filename.replace(".png", "_output_extension.png"))
     if len(command_line_arguments) == 2:
         output_filename = Path(command_line_arguments[1])
 
     # we read in the png file, and receive three pixel arrays for red, green and blue components, respectively
     # each pixel array contains 8 bit integer values between 0 and 255 encoding the color values
-    (image_width, image_height, px_array_r, px_array_g,
-     px_array_b) = readRGBImageToSeparatePixelArrays(input_filename)
+    (image_width, image_height, px_array_r, px_array_g, px_array_b) = readRGBImageToSeparatePixelArrays(input_filename)
 
     # setup the plots for intermediate results in a figure
     fig1, axs1 = pyplot.subplots(2, 2)
@@ -143,11 +142,10 @@ def main():
         aspect_ratio = (x_max - x_min + 1) / (y_max - y_min + 1)
         if (1.5 <= aspect_ratio <= 5):
             bbox_min_x, bbox_max_x, bbox_min_y, bbox_max_y = x_min, x_max, y_min, y_max
-            print(x_min, x_max, y_min, y_max)
             break
 
     # Draw a bounding box as a rectangle into the input image
-    axs1[1, 1].set_title('Final image of detection')
+    axs1[1, 1].set_title('Bounding box')
     axs1[1, 1].imshow(px_array_grey, cmap='gray')
     rect = Rectangle((bbox_min_x, bbox_min_y), bbox_max_x - bbox_min_x, bbox_max_y - bbox_min_y, linewidth=1,
                      edgecolor='g', facecolor='none')
@@ -155,17 +153,19 @@ def main():
     
 
     # OCR on the bounding box.
-
-    # Crop image to bounding box.
+    image_cropped = np.array(px_array_grey, dtype=np.uint8)[bbox_min_y:bbox_max_y, bbox_min_x:bbox_max_x]
 
     # Get reader to read.
+    reader = easyocr.Reader(['en'])
+    result = reader.readtext(image_cropped, detail=0)
+    license_number = 'NOT FOUND'
+    if len(result) != 0:
+        license_number = ''
+        for chunk in result:
+            license_number += chunk
 
-    # reader = easyocr.Reader(['en'])
-    # result = reader.readtext(, detail=0)
-    # print(result)
+    print("Processing complete! License plate number is: " + license_number)
 
-
-    print("Processing complete!")
 
     # write the output image into output_filename, using the matplotlib savefig method
     extent = axs1[1, 1].get_window_extent().transformed(fig1.dpi_scale_trans.inverted())
