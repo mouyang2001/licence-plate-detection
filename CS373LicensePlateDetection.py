@@ -88,13 +88,6 @@ def main():
 
     # setup the plots for intermediate results in a figure
     fig1, axs1 = pyplot.subplots(2, 2)
-    axs1[0, 0].set_title('Input red channel of image')
-    axs1[0, 0].imshow(px_array_r, cmap='gray')
-    axs1[0, 1].set_title('Input green channel of image')
-    axs1[0, 1].imshow(px_array_g, cmap='gray')
-    axs1[1, 0].set_title('Input blue channel of image')
-    axs1[1, 0].imshow(px_array_b, cmap='gray')
-
 
     # STUDENT IMPLEMENTATION here
 
@@ -102,27 +95,42 @@ def main():
     print("Computing greyscale image...")
     px_array_grey = computeRGBToGreyscale(px_array_r, px_array_g, px_array_b, image_width, image_height)
 
-    # Compute std_dev image then stretch min-max scaling 0 to 255.
+
+    # Compute std_dev image.
     print("Computing standard deviation image...")
     px_array = computeStandardDeviationImage5x5(px_array_grey, image_width, image_height)
+    axs1[0, 0].set_title('Standard deviation')
+    axs1[0, 0].imshow(px_array, cmap='gray')
+
+
+    # Compute contrast stretched image.
     print("Computing 0 to 255 stretched image...")
     px_array = scaleTo0And255AndQuantize(px_array, image_width, image_height)
-    
+
+
     # Compute threshold image with simple thresholding.
     px_array = computeThresholdGE(px_array, 170, image_width, image_height)
+    axs1[0, 1].set_title('Thresholding')
+    axs1[0, 1].imshow(px_array, cmap='gray')
 
-    # Compute dialation and erosion.
+
+    # Compute morphological closing (dilation followed by erosion)
     for i in range(7):
-        print("Computing dialation step #{}...".format(i+1))
+        print("Computing dilation step #{}...".format(i+1))
         px_array = computeDilation8Nbh3x3FlatSE(px_array, image_width, image_height)
     
     for i in range(7):
         print("Computing erosion step #{}...".format(i+1))
         px_array = computeErosion8Nbh3x3FlatSE(px_array, image_width, image_height)
 
+    axs1[1, 0].set_title('Morphological closing')
+    axs1[1, 0].imshow(px_array, cmap='gray')
+
+
     # Compute connected components image.
     print("Computing connected components...")
     (px_array, components) = computeConnectedComponentLabeling(px_array, image_width, image_height)
+
 
     # Compute a bounding box. Largest connected component within correct aspect ratio.
     print("Computing bounding box...")
@@ -136,6 +144,7 @@ def main():
 
     print("Processing complete!")
 
+
     # Draw a bounding box as a rectangle into the input image
     axs1[1, 1].set_title('Final image of detection')
     axs1[1, 1].imshow(px_array_grey, cmap='gray')
@@ -144,10 +153,10 @@ def main():
     axs1[1, 1].add_patch(rect)
 
 
-
     # write the output image into output_filename, using the matplotlib savefig method
     extent = axs1[1, 1].get_window_extent().transformed(fig1.dpi_scale_trans.inverted())
     pyplot.savefig(output_filename, bbox_inches=extent, dpi=600)
+
 
     if SHOW_DEBUG_FIGURES:
         # plot the current figure
