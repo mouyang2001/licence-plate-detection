@@ -109,7 +109,7 @@ def main():
     px_array = scaleTo0And255AndQuantize(px_array, image_width, image_height)
     
     # Compute threshold image with simple thresholding.
-    px_array = computeThresholdGE(px_array, 150, image_width, image_height)
+    px_array = computeThresholdGE(px_array, 170, image_width, image_height)
 
     # Compute dialation and erosion.
     for i in range(7):
