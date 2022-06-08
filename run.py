@@ -5,6 +5,8 @@ args = sys.argv[1:]
 
 NUMBER_OF_IMAGES = 6
 
+# The purpose of this script is for testing all the images in parallel.
+# NOTE: standard output is messy, this script is not intended for marking.
 def main():
     script_name = "CS373LicensePlateDetection.py"
     if args != [] and args[0] == '-extension':
