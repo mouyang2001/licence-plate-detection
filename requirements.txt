@@ -1,4 +1,2 @@
-matplotlib
-numpy
-opencv-python
 easyocr
+matplotlib

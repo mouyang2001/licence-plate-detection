@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import easyocr
 
 args = sys.argv[1:]
 
@@ -10,6 +11,7 @@ NUMBER_OF_IMAGES = 6
 def main():
     script_name = "CS373LicensePlateDetection.py"
     if args != [] and args[0] == '-extension':
+        model = easyocr.Reader(['en'])
         script_name = "CS373_extension.py"
     
     commands = []
