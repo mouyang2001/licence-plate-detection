@@ -1,30 +1,42 @@
-# About
+# CS373 Assignment
+
+## About
 
 This is a image processing assignment for the course [COMSCI 373](https://courseoutline.auckland.ac.nz/dco/course/COMPSCI/373). The aim of this project is to detect the bounding box around the license plate in an
 image of a car. The project also includes an extension script which aims to further extract the characters of the license plate using an OCR algorithm.
 
-# Run
+## Run
 Make sure you have the latest version of pip and python. I tested on python 3.10.2 and beyond.
 
 Install requirements:
 
-```pip install -r requirements.txt```
+```bash
+> pip install -r requirements.txt
+```
 
 Run the main program:
 
-```python CS373LicensePlateDetection.py <image_file>.png```
+```bash
+> python CS373LicensePlateDetection.py <image_file>.png
+```
 
 Run the extension program:
 
-```python CS373_extension.py <image_file>.png```
+```bash
+> python CS373_extension.py <image_file>.png
+```
 
 Run on all images with the run script:
 
-```python run.py```
+```bash
+> python run.py
+```
 
-```python run.py -extension```
+```bash
+> python run.py -extension
+```
 
-# Extension Report
+## Extension Report
 
 For my extension of the license plate detection algorithm, I decided to high level libraries to speed up the algorithm such as opencv and numpy. For reading the text I used easyocr which installed an optical character recognition modal that could read the text and output it to the console.
 
@@ -36,11 +48,11 @@ The next step was to analyse the cropped image and extract any text from it. The
 
 Further improvements could include, speeding up the standard deviation calculation as this is the slowest part of the program. Opencv lacks a dedicated standard deviation filter method, so I kept it the same from the main task.
 
-## Results
+### Results
 
 ![Plotted detection process](./example_output/Figure_1.png "The detection process")
 
-# Technologies
+## Technologies
 
 - [matplotlib](https://github.com/matplotlib/matplotlib) for plotting output.
 - [numpy](https://github.com/numpy/numpy) for numerical computation.
